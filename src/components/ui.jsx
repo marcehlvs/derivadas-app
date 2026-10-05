@@ -1,6 +1,7 @@
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { Check, X } from "lucide-react";
-import { activate, deactivateSoon, getSnapshot, subscribe } from "../keypad.js";
+import { getSnapshot, subscribe } from "../keypad.js";
+import MathField from "./MathField.jsx";
 
 /* Componentes chicos compartidos por todas las solapas. */
 
@@ -10,26 +11,16 @@ import { activate, deactivateSoon, getSnapshot, subscribe } from "../keypad.js";
  */
 export function AnswerInput({ value, onChange, state, width = 64, suffix, hint, disabled = false, label, grow = false }) {
   const { native } = useSyncExternalStore(subscribe, getSnapshot);
-  const latest = useRef(onChange);
-  useEffect(() => { latest.current = onChange; });
   return (
     <span className={`ans-wrap ${grow ? "ans-wrap--grow" : ""}`}>
-      <input
-        type="text"
-        className={`ans-input ${state === "ok" ? "ans-input--ok" : state === "bad" ? "ans-input--bad" : ""}`}
-        style={{ width: grow ? "100%" : width }}
+      <MathField
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        inputMode={native ? "text" : "none"}
-        enterKeyHint="done"
-        spellCheck={false}
-        autoCapitalize="off"
-        autoCorrect="off"
-        onFocus={(e) => activate(e.target, (v) => latest.current(v))}
-        onBlur={(e) => deactivateSoon(e.target)}
-        autoComplete="off"
-        aria-label={label}
+        onChange={onChange}
+        native={native}
         disabled={disabled}
+        label={label}
+        className={`ans-input ${state === "ok" ? "ans-input--ok" : state === "bad" ? "ans-input--bad" : ""}`}
+        style={grow ? { width: "100%" } : { minWidth: width }}
       />
       {suffix && <span className="ans-suffix">{suffix}</span>}
       {state === "ok" && <Check size={14} className="ans-icon--ok" />}
